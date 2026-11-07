@@ -150,7 +150,7 @@ checksums.txt
 ```text
 .github/workflows/   CI 测试、原生构建与标签发布
 .github/scripts/     发布压缩包打包脚本
-assets/logo.png      Z.AI 与插件商店 logo
+assets/logo.png      插件贴纸：插件在商店中的标识
 assets/bigmodel.png  BigModel.cn 登录 logo
 go/                  Go/cgo 插件实现与测试
 docs/USAGE.md        部署安装与使用指南

@@ -165,7 +165,7 @@ ecosystem development standards.
 ```text
 .github/workflows/   CI tests, native builds and tagged releases
 .github/scripts/     Release archive packager
-assets/logo.png      Z.AI and plugin-store logo
+assets/logo.png      Plugin sticker: the plugin's face in a store
 assets/bigmodel.png  BigModel.cn sign-in logo
 go/                  Go/cgo plugin implementation and tests
 docs/USAGE.md        Operator installation and usage guide
