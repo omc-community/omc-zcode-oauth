@@ -91,7 +91,9 @@ local callback listener, or manual callback URL submission is required.
 - Normalized subscription, 5-hour, weekly, MCP and gift-bucket quota.
 - Per-credential concurrency control.
 - Bounded retry for ZCode concurrency errors and fail-closed handling for risk
-  controls.
+  controls. A quota or concurrency refusal also states how long it still runs when
+  ZCode sends `Retry-After`, so CPA rests the credential instead of retrying inside
+  the window.
 
 ## Installation
 

@@ -1,0 +1,28 @@
+{
+  "id": "bd9ea67ef",
+  "name": "watch v0.2.0 release CI",
+  "command": "cd /root/project/omc-zcode-oauth && gh run watch 41402831642 --repo WizisCool/omc-zcode-oauth --exit-status 2>&1 | tail -20",
+  "status": "completed",
+  "outputPath": ".pi/tasks/01a1970e-7cf7-736c-b36e-d951f4d54915-835/bd9ea67ef.output",
+  "cwd": "/root/project/omc-zcode-oauth",
+  "startTime": 1793602647207,
+  "endTime": 1793602648190,
+  "exitCode": 0,
+  "signal": null,
+  "pid": 50952,
+  "bytesWritten": 73,
+  "isAgent": false,
+  "surviveReload": false,
+  "notified": true,
+  "notifyOnCompletion": true,
+  "triggerOnCompletion": true,
+  "timeoutSeconds": 1200,
+  "shellPolicy": {
+    "policy": "inherit",
+    "executable": "/usr/bin/bash",
+    "argvPrefix": [
+      "-c"
+    ],
+    "dialect": "bash"
+  }
+}

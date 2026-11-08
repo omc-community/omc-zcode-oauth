@@ -1,0 +1,939 @@
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.2.2 Build and release · 42257609860
+Triggered via push less than a minute ago
+
+JOBS
+* Test (ID 128028867574)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Validate release identity
+  ✓ Offline release tooling tests
+  ✓ Download modules
+  ✓ Offline tests
+  ✓ Offline release-linked tests
+  ✓ Offline vet
+  * Default build and actual linker drift regressions
+  * Post Run actions/setup-go@v6
+  * Post Run actions/checkout@v5
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.2.2 Build and release · 42257609860
+Triggered via push less than a minute ago
+
+JOBS
+✓ Test in 21s (ID 128028867574)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Validate release identity
+  ✓ Offline release tooling tests
+  ✓ Download modules
+  ✓ Offline tests
+  ✓ Offline release-linked tests
+  ✓ Offline vet
+  ✓ Default build and actual linker drift regressions
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+* Build windows/arm64 (ID 128029082781)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  * Run actions/setup-go@v6
+  * Resolve release metadata
+  * Install Zig for Windows builds
+  * Configure Windows C compiler
+  * Download modules
+  * Build shared library
+  * Native ABI and descriptor smoke test
+  * Package plugin
+  * Run actions/upload-artifact@v4
+  * Upload public plugin declaration
+  * Post Run actions/setup-go@v6
+  * Post Run actions/checkout@v5
+* Build linux/arm64 (ID 128029082791)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  * Run actions/setup-go@v6
+  * Resolve release metadata
+  * Install Zig for Windows builds
+  * Configure Windows C compiler
+  * Download modules
+  * Build shared library
+  * Native ABI and descriptor smoke test
+  * Package plugin
+  * Run actions/upload-artifact@v4
+  * Upload public plugin declaration
+  * Post Run actions/setup-go@v6
+  * Post Run actions/checkout@v5
+* Build linux/amd64 (ID 128029082834)
+  ✓ Set up job
+  * Run actions/checkout@v5
+  * Run actions/setup-go@v6
+  * Resolve release metadata
+  * Install Zig for Windows builds
+  * Configure Windows C compiler
+  * Download modules
+  * Build shared library
+  * Native ABI and descriptor smoke test
+  * Package plugin
+  * Run actions/upload-artifact@v4
+  * Upload public plugin declaration
+  * Post Run actions/checkout@v5
+* Build darwin/arm64 (ID 128029082892)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  * Run actions/setup-go@v6
+  * Resolve release metadata
+  * Install Zig for Windows builds
+  * Configure Windows C compiler
+  * Download modules
+  * Build shared library
+  * Native ABI and descriptor smoke test
+  * Package plugin
+  * Run actions/upload-artifact@v4
+  * Upload public plugin declaration
+  * Post Run actions/setup-go@v6
+  * Post Run actions/checkout@v5
+* Build windows/amd64 (ID 128029082985)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  * Install Zig for Windows builds
+  * Configure Windows C compiler
+  * Download modules
+  * Build shared library
+  * Native ABI and descriptor smoke test
+  * Package plugin
+  * Run actions/upload-artifact@v4
+  * Upload public plugin declaration
+  * Post Run actions/setup-go@v6
+  * Post Run actions/checkout@v5
+* Build darwin/amd64 (ID 128029082989)
+  ✓ Set up job
+  * Run actions/checkout@v5
+  * Run actions/setup-go@v6
+  * Resolve release metadata
+  * Install Zig for Windows builds
+  * Configure Windows C compiler
+  * Download modules
+  * Build shared library
+  * Native ABI and descriptor smoke test
+  * Package plugin
+  * Run actions/upload-artifact@v4
+  * Upload public plugin declaration
+  * Post Run actions/checkout@v5
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.2.2 Build and release · 42257609860
+Triggered via push about 1 minute ago
+
+JOBS
+✓ Test in 21s (ID 128028867574)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Validate release identity
+  ✓ Offline release tooling tests
+  ✓ Download modules
+  ✓ Offline tests
+  ✓ Offline release-linked tests
+  ✓ Offline vet
+  ✓ Default build and actual linker drift regressions
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+* Build windows/arm64 (ID 128029082781)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  ✓ Install Zig for Windows builds
+  ✓ Configure Windows C compiler
+  ✓ Download modules
+  * Build shared library
+  * Native ABI and descriptor smoke test
+  * Package plugin
+  * Run actions/upload-artifact@v4
+  * Upload public plugin declaration
+  * Post Run actions/setup-go@v6
+  * Post Run actions/checkout@v5
+✓ Build linux/arm64 in 24s (ID 128029082791)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build linux/amd64 in 37s (ID 128029082834)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  ✓ Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+* Build darwin/arm64 (ID 128029082892)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+* Build windows/amd64 (ID 128029082985)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  ✓ Install Zig for Windows builds
+  ✓ Configure Windows C compiler
+  ✓ Download modules
+  * Build shared library
+  * Native ABI and descriptor smoke test
+  * Package plugin
+  * Run actions/upload-artifact@v4
+  * Upload public plugin declaration
+  * Post Run actions/setup-go@v6
+  * Post Run actions/checkout@v5
+* Build darwin/amd64 (ID 128029082989)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  * Run actions/setup-go@v6
+  * Resolve release metadata
+  * Install Zig for Windows builds
+  * Configure Windows C compiler
+  * Download modules
+  * Build shared library
+  * Native ABI and descriptor smoke test
+  * Package plugin
+  * Run actions/upload-artifact@v4
+  * Upload public plugin declaration
+  * Post Run actions/setup-go@v6
+  * Post Run actions/checkout@v5
+
+ANNOTATIONS
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build linux/arm64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build linux/amd64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build darwin/arm64: .github#2
+
+- Due to capacity constraints, jobs targeting macOS arm64 runners may experience longer queue times.
+Build darwin/arm64: .github#1
+
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.2.2 Build and release · 42257609860
+Triggered via push about 1 minute ago
+
+JOBS
+✓ Test in 21s (ID 128028867574)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Validate release identity
+  ✓ Offline release tooling tests
+  ✓ Download modules
+  ✓ Offline tests
+  ✓ Offline release-linked tests
+  ✓ Offline vet
+  ✓ Default build and actual linker drift regressions
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+* Build windows/arm64 (ID 128029082781)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  ✓ Install Zig for Windows builds
+  ✓ Configure Windows C compiler
+  ✓ Download modules
+  * Build shared library
+  * Native ABI and descriptor smoke test
+  * Package plugin
+  * Run actions/upload-artifact@v4
+  * Upload public plugin declaration
+  * Post Run actions/setup-go@v6
+  * Post Run actions/checkout@v5
+✓ Build linux/arm64 in 24s (ID 128029082791)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build linux/amd64 in 37s (ID 128029082834)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  ✓ Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build darwin/arm64 in 37s (ID 128029082892)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+* Build windows/amd64 (ID 128029082985)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  ✓ Install Zig for Windows builds
+  ✓ Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  - Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  * Post Run actions/checkout@v5
+* Build darwin/amd64 (ID 128029082989)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  * Run actions/setup-go@v6
+  * Resolve release metadata
+  * Install Zig for Windows builds
+  * Configure Windows C compiler
+  * Download modules
+  * Build shared library
+  * Native ABI and descriptor smoke test
+  * Package plugin
+  * Run actions/upload-artifact@v4
+  * Upload public plugin declaration
+  * Post Run actions/setup-go@v6
+  * Post Run actions/checkout@v5
+
+ANNOTATIONS
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build linux/arm64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build linux/amd64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build darwin/arm64: .github#2
+
+- Due to capacity constraints, jobs targeting macOS arm64 runners may experience longer queue times.
+Build darwin/arm64: .github#1
+
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.2.2 Build and release · 42257609860
+Triggered via push about 1 minute ago
+
+JOBS
+✓ Test in 21s (ID 128028867574)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Validate release identity
+  ✓ Offline release tooling tests
+  ✓ Download modules
+  ✓ Offline tests
+  ✓ Offline release-linked tests
+  ✓ Offline vet
+  ✓ Default build and actual linker drift regressions
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+* Build windows/arm64 (ID 128029082781)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  ✓ Install Zig for Windows builds
+  ✓ Configure Windows C compiler
+  ✓ Download modules
+  * Build shared library
+  * Native ABI and descriptor smoke test
+  * Package plugin
+  * Run actions/upload-artifact@v4
+  * Upload public plugin declaration
+  * Post Run actions/setup-go@v6
+  * Post Run actions/checkout@v5
+✓ Build linux/arm64 in 24s (ID 128029082791)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build linux/amd64 in 37s (ID 128029082834)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  ✓ Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build darwin/arm64 in 37s (ID 128029082892)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build windows/amd64 in 1m4s (ID 128029082985)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  ✓ Install Zig for Windows builds
+  ✓ Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  - Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+* Build darwin/amd64 (ID 128029082989)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  * Run actions/upload-artifact@v4
+  * Upload public plugin declaration
+  * Post Run actions/setup-go@v6
+  * Post Run actions/checkout@v5
+
+ANNOTATIONS
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build linux/arm64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build linux/amd64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build darwin/arm64: .github#2
+
+- Due to capacity constraints, jobs targeting macOS arm64 runners may experience longer queue times.
+Build darwin/arm64: .github#1
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build windows/amd64: .github#2
+
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.2.2 Build and release · 42257609860
+Triggered via push about 2 minutes ago
+
+JOBS
+✓ Test in 21s (ID 128028867574)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Validate release identity
+  ✓ Offline release tooling tests
+  ✓ Download modules
+  ✓ Offline tests
+  ✓ Offline release-linked tests
+  ✓ Offline vet
+  ✓ Default build and actual linker drift regressions
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+* Build windows/arm64 (ID 128029082781)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  ✓ Install Zig for Windows builds
+  ✓ Configure Windows C compiler
+  ✓ Download modules
+  * Build shared library
+  * Native ABI and descriptor smoke test
+  * Package plugin
+  * Run actions/upload-artifact@v4
+  * Upload public plugin declaration
+  * Post Run actions/setup-go@v6
+  * Post Run actions/checkout@v5
+✓ Build linux/arm64 in 24s (ID 128029082791)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build linux/amd64 in 37s (ID 128029082834)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  ✓ Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build darwin/arm64 in 37s (ID 128029082892)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build windows/amd64 in 1m4s (ID 128029082985)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  ✓ Install Zig for Windows builds
+  ✓ Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  - Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build darwin/amd64 in 1m24s (ID 128029082989)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+
+ANNOTATIONS
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build linux/arm64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build linux/amd64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build darwin/arm64: .github#2
+
+- Due to capacity constraints, jobs targeting macOS arm64 runners may experience longer queue times.
+Build darwin/arm64: .github#1
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build windows/amd64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build darwin/amd64: .github#2
+
+Refreshing run status every 20 seconds. Press Ctrl+C to quit.
+
+* v0.2.2 Build and release · 42257609860
+Triggered via push about 2 minutes ago
+
+JOBS
+✓ Test in 21s (ID 128028867574)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Validate release identity
+  ✓ Offline release tooling tests
+  ✓ Download modules
+  ✓ Offline tests
+  ✓ Offline release-linked tests
+  ✓ Offline vet
+  ✓ Default build and actual linker drift regressions
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build windows/arm64 in 1m59s (ID 128029082781)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  ✓ Install Zig for Windows builds
+  ✓ Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  - Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build linux/arm64 in 24s (ID 128029082791)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build linux/amd64 in 37s (ID 128029082834)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  ✓ Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build darwin/arm64 in 37s (ID 128029082892)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build windows/amd64 in 1m4s (ID 128029082985)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  ✓ Install Zig for Windows builds
+  ✓ Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  - Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build darwin/amd64 in 1m24s (ID 128029082989)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+* Publish release (ID 128030189833)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  * Run actions/setup-go@v6
+  * Run actions/download-artifact@v4
+  * Verify release assets before publishing
+  * Publish GitHub release
+  * Post Run actions/setup-go@v6
+  * Post Run actions/checkout@v5
+
+ANNOTATIONS
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build linux/arm64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build linux/amd64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build darwin/arm64: .github#2
+
+- Due to capacity constraints, jobs targeting macOS arm64 runners may experience longer queue times.
+Build darwin/arm64: .github#1
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build windows/amd64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build darwin/amd64: .github#2
+
+✓ v0.2.2 Build and release · 42257609860
+Triggered via push about 3 minutes ago
+
+JOBS
+✓ Test in 21s (ID 128028867574)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Validate release identity
+  ✓ Offline release tooling tests
+  ✓ Download modules
+  ✓ Offline tests
+  ✓ Offline release-linked tests
+  ✓ Offline vet
+  ✓ Default build and actual linker drift regressions
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build windows/arm64 in 1m59s (ID 128029082781)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  ✓ Install Zig for Windows builds
+  ✓ Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  - Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build linux/arm64 in 24s (ID 128029082791)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build linux/amd64 in 37s (ID 128029082834)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  ✓ Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build darwin/arm64 in 37s (ID 128029082892)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build windows/amd64 in 1m4s (ID 128029082985)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  ✓ Install Zig for Windows builds
+  ✓ Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  - Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Build darwin/amd64 in 1m24s (ID 128029082989)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Resolve release metadata
+  - Install Zig for Windows builds
+  - Configure Windows C compiler
+  ✓ Download modules
+  ✓ Build shared library
+  ✓ Native ABI and descriptor smoke test
+  ✓ Package plugin
+  ✓ Run actions/upload-artifact@v4
+  - Upload public plugin declaration
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+✓ Publish release in 25s (ID 128030189833)
+  ✓ Set up job
+  ✓ Run actions/checkout@v5
+  ✓ Run actions/setup-go@v6
+  ✓ Run actions/download-artifact@v4
+  ✓ Verify release assets before publishing
+  ✓ Publish GitHub release
+  ✓ Post Run actions/setup-go@v6
+  ✓ Post Run actions/checkout@v5
+  ✓ Complete job
+
+ANNOTATIONS
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build linux/arm64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build linux/amd64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build darwin/arm64: .github#2
+
+- Due to capacity constraints, jobs targeting macOS arm64 runners may experience longer queue times.
+Build darwin/arm64: .github#1
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build windows/amd64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Build darwin/amd64: .github#2
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/download-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+Publish release: .github#2
+

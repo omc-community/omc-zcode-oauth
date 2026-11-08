@@ -81,7 +81,9 @@ OAuth 发起和轮询使用 CPA 原生受认证管理 API，公共插件资源�
 - 流式与非流式 Anthropic Messages 请求。
 - 标准化的订阅、5 小时、每周、MCP 与礼包桶配额。
 - 按凭证的并发控制。
-- ZCode 并发错误的有限重试，风控失效关闭（fail-closed）处理。
+- ZCode 并发错误的有限重试，风控失效关闭（fail-closed）处理。ZCode 在配额或并发报错
+  上给出 `Retry-After` 时，错误同时带上还剩多久，CPA 因此会让凭证休息，而不是在窗口内
+  继续重试。
 
 ## 安装
 

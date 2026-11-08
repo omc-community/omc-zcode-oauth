@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -192,11 +193,12 @@ func prepareRequest(req pluginapi.ExecutorRequest, sender httpSender) (requestPl
 }
 
 type disposition struct {
-	Retry   bool
-	Code    string
-	Status  int
-	Message string
-	Risk    bool
+	Retry      bool
+	Code       string
+	Status     int
+	Message    string
+	Risk       bool
+	RetryAfter int
 }
 
 func errorCode(raw []byte) string {
@@ -238,7 +240,7 @@ func errorCode(raw []byte) string {
 	}
 	return ""
 }
-func classify(status int, body []byte) disposition {
+func classify(status int, headers http.Header, body []byte) disposition {
 	lower := strings.ToLower(string(body))
 	code := errorCode(body)
 	if strings.Contains(lower, "errors.aliyun.com") {
@@ -247,18 +249,55 @@ func classify(status int, body []byte) disposition {
 	if (status == 405 && code == "3012") || strings.Contains(lower, "unusual activity") {
 		return disposition{Code: "force_cooldown", Status: 403, Message: "ZCode account blocked by risk control (3012); contact ZCode support", Risk: true}
 	}
+	hint := retryAfterHint(headers)
 	if code == "3008" || code == "3009" {
-		return disposition{Retry: true, Code: code, Status: 429, Message: "ZCode concurrency limit reached (code " + code + ")"}
+		return disposition{Retry: true, Code: code, Status: 429, Message: "ZCode concurrency limit reached (code " + code + ")", RetryAfter: hint}
 	}
 	if code == "1113" || code == "1005" || status == 429 {
-		return disposition{Code: "quota_exhausted", Status: 429, Message: "ZCode quota exhausted (code " + code + ")"}
+		return disposition{Code: "quota_exhausted", Status: 429, Message: "ZCode quota exhausted (code " + code + ")", RetryAfter: hint}
 	}
 	if status >= 400 {
 		return disposition{Code: "upstream_error", Status: status, Message: fmt.Sprintf("ZCode upstream failed (HTTP %d, code %s)", status, code)}
 	}
 	return disposition{}
 }
-func decisionError(d disposition) error { return pluginabi.NewError(d.Code, d.Message, d.Status) }
+func decisionError(d disposition) error {
+	err := pluginabi.NewError(d.Code, d.Message, d.Status)
+	err.RetryAfterSeconds = d.RetryAfter
+	return err
+}
+
+// retryAfterHint is how long ZCode says a limit still runs, in whole seconds, or 0
+// when it says nothing. A refusal that carries Retry-After is the only deadline a
+// quota or concurrency rejection states; CPA reads the number as the cooldown it
+// applies, so without it the credential is retried while the window is still open.
+func retryAfterHint(headers http.Header) int {
+	value := ""
+	if headers != nil {
+		value = strings.TrimSpace(headers.Get("Retry-After"))
+	}
+	if value == "" {
+		return 0
+	}
+	if seconds, err := strconv.Atoi(value); err == nil {
+		if seconds > 0 {
+			return seconds
+		}
+		return 0
+	}
+	at, err := http.ParseTime(value)
+	if err != nil {
+		return 0
+	}
+	wait := time.Until(at)
+	if wait <= 0 {
+		return 0
+	}
+	if seconds := int(wait / time.Second); seconds > 0 {
+		return seconds
+	}
+	return 1
+}
 func recordRisk(plan requestPlan, d *disposition) {
 	if d.Risk && blockAccount(plan.Credential, plan.AuthID) != nil {
 		d.Message += "; could not persist the account risk marker, keep the plugin stopped until storage is fixed"
@@ -276,7 +315,7 @@ func execute(req pluginapi.ExecutorRequest, sender httpSender) (pluginapi.Execut
 		if e != nil {
 			return pluginapi.ExecutorResponse{}, pluginabi.NewError("transport_error", "ZCode upstream transport failed", 503)
 		}
-		d := classify(resp.StatusCode, resp.Body)
+		d := classify(resp.StatusCode, resp.Headers, resp.Body)
 		recordRisk(plan, &d)
 		if d.Retry && attempt < len(waits) {
 			waitFunc(waits[attempt])
@@ -613,7 +652,7 @@ func executeStream(req pluginapi.ExecutorRequest, callbackID, streamID string, s
 				release()
 				return nil, pluginabi.NewError("transport_error", "ZCode upstream stream failed", 503)
 			}
-			d := classify(response.StatusCode, raw)
+			d := classify(response.StatusCode, response.Headers, raw)
 			recordRisk(plan, &d)
 			if d.Retry && attempt < len(waits) {
 				waitFunc(waits[attempt])

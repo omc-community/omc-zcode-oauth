@@ -1,0 +1,28 @@
+{
+  "id": "bdbe347e3",
+  "name": "Watch v0.1.3 release CI",
+  "command": "while true; do status=$(gh run view 41098695178 --repo WizisCool/omc-zcode-oauth --json status,conclusion -q '.status + \":\" + (.conclusion // \"\")' 2>/dev/null); case \"$status\" in completed:*) echo \"FINAL:$status\"; break;; esac; sleep 20; done",
+  "description": "Watch v0.1.3 build-and-release workflow until terminal state",
+  "status": "completed",
+  "outputPath": ".pi/tasks/01a18d64-3406-753a-b718-d796e93382b4-64506/bdbe347e3.output",
+  "cwd": "/root/project/omc-zcode-oauth",
+  "startTime": 1793381153974,
+  "endTime": 1793381322589,
+  "exitCode": 0,
+  "signal": null,
+  "pid": 20715,
+  "bytesWritten": 24,
+  "isAgent": false,
+  "surviveReload": false,
+  "notified": true,
+  "notifyOnCompletion": true,
+  "triggerOnCompletion": true,
+  "shellPolicy": {
+    "policy": "inherit",
+    "executable": "/bin/sh",
+    "argvPrefix": [
+      "-c"
+    ],
+    "dialect": "posix"
+  }
+}

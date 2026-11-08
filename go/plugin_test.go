@@ -17,6 +17,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/router-for-me/CLIProxyAPI/v8/sdk/pluginabi"
 	"github.com/router-for-me/CLIProxyAPI/v8/sdk/pluginapi"
 )
 
@@ -613,13 +614,50 @@ func TestErrorClassification(t *testing.T) {
 	}{{"user cap", 429, `{"code":3008}`, "3008", 429, true, false}, {"model cap", 429, `{"error":{"code":"3009"}}`, "3009", 429, true, false}, {"balance", 200, `{"code":1113}`, "quota_exhausted", 429, false, false}, {"quota", 200, `{"error":{"code":1005}}`, "quota_exhausted", 429, false, false}, {"generic 429", 429, `{}`, "quota_exhausted", 429, false, false}, {"risk", 405, `{"code":3012}`, "force_cooldown", 403, false, true}, {"unusual", 403, `{"message":"unusual activity"}`, "force_cooldown", 403, false, true}, {"WAF", 403, `<html>errors.aliyun.com</html>`, "request_scoped", 400, false, false}, {"5xx", 503, `{}`, "upstream_error", 503, false, false}}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			d := classify(tc.status, []byte(tc.body))
+			d := classify(tc.status, nil, []byte(tc.body))
 			if d.Code != tc.want || d.Status != tc.outStatus || d.Retry != tc.retry || d.Risk != tc.risk {
 				t.Fatalf("decision=%+v", d)
 			}
 		})
 	}
 }
+
+// TestQuotaRefusalCarriesTheRetryWindow pins what a quota or concurrency refusal
+// hands CPA: a Retry-After is the only deadline it states, and without it the
+// credential is retried while the window is still open.
+func TestQuotaRefusalCarriesTheRetryWindow(t *testing.T) {
+	at := time.Now().Add(90 * time.Second).UTC().Format(http.TimeFormat)
+	for _, tc := range []struct {
+		name    string
+		status  int
+		headers http.Header
+		body    string
+		want    int
+	}{
+		{"quota seconds", 429, http.Header{"Retry-After": {"120"}}, `{"code":1113}`, 120},
+		{"quota http date", 200, http.Header{"Retry-After": {at}}, `{"code":1005}`, 90},
+		{"concurrency seconds", 429, http.Header{"Retry-After": {"15"}}, `{"code":3008}`, 15},
+		{"no statement", 429, nil, `{}`, 0},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			d := classify(tc.status, tc.headers, []byte(tc.body))
+			if tc.want == 0 {
+				if d.RetryAfter != 0 {
+					t.Fatalf("RetryAfter = %d, want none", d.RetryAfter)
+				}
+				return
+			}
+			if d.RetryAfter < tc.want-2 || d.RetryAfter > tc.want {
+				t.Fatalf("RetryAfter = %d, want about %d", d.RetryAfter, tc.want)
+			}
+			var perr *pluginabi.Error
+			if err := decisionError(d); !errors.As(err, &perr) || perr.RetryAfterSeconds != d.RetryAfter {
+				t.Fatalf("decisionError did not carry the window: %#v", err)
+			}
+		})
+	}
+}
+
 func TestBusyRetriesReuseBytes(t *testing.T) {
 	setAuthDir(t.TempDir())
 	old := waitFunc
@@ -677,7 +715,7 @@ func TestRiskMarkerFailureDoesNotRetry(t *testing.T) {
 	if err := os.Remove(dir); err != nil {
 		t.Fatal(err)
 	}
-	d := classify(405, []byte(`{"code":3012}`))
+	d := classify(405, nil, []byte(`{"code":3012}`))
 	recordRisk(requestPlan{Credential: c, AuthID: "risk-failure"}, &d)
 	if d.Retry || !d.Risk || !strings.Contains(d.Message, "could not persist") {
 		t.Fatalf("risk decision did not report persistence failure: %+v", d)
