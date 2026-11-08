@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"sync"
 	"testing"
@@ -949,5 +950,77 @@ func TestAuthParseAndRefreshBehavior(t *testing.T) {
 	_, err := handleMethod("auth.refresh", []byte(`{}`))
 	if err == nil || !strings.Contains(err.Error(), "sign in again") {
 		t.Fatal("refresh did not request relogin")
+	}
+}
+
+// The management API writes fields such as note next to the credential, and CPA
+// rebuilds the runtime auth from parseAuth's metadata on every reload. A parser
+// that republishes identity keys alone makes those writes read back as
+// unpersisted (the console reports "CPA did not persist note").
+func TestParseAuthPreservesManagementFields(t *testing.T) {
+	persisted := map[string]any{
+		"type":            "zcode",
+		"site":            "zai",
+		"key":             "fixture-key",
+		"jwt":             "fixture-jwt",
+		"device":          "fixture-device",
+		"uid":             "id",
+		"email":           "alice@example.test",
+		"oauth_provider":  "stale-entry",
+		"note":            "work account",
+		"prefix":          "z",
+		"priority":        7,
+		"weight":          3,
+		"proxy_url":       "http://proxy.test:8080",
+		"disable_cooling": true,
+		"websockets":      false,
+		"using_api":       true,
+		"expired":         "2030-01-01T00:00:00Z",
+		"request_retry":   2,
+		"headers":         map[string]any{"X-Test": "1"},
+		"excluded_models": []any{"m1"},
+		"model_aliases":   []any{map[string]any{"name": "m", "alias": "a"}},
+	}
+	body, err := json.Marshal(persisted)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var want map[string]any
+	if err := json.Unmarshal(body, &want); err != nil {
+		t.Fatal(err)
+	}
+	credentialKeys := map[string]bool{"site": true, "key": true, "jwt": true, "device": true, "uid": true}
+	resp := parseAuth(pluginapi.AuthParseRequest{Provider: "zcode", FileName: "zcode-x.json", RawJSON: body})
+	if !resp.Handled {
+		t.Fatal("credential not recognized")
+	}
+	for key, expected := range want {
+		switch key {
+		case "type", "email", "oauth_provider":
+			continue
+		}
+		if credentialKeys[key] {
+			continue
+		}
+		if got := resp.Auth.Metadata[key]; !reflect.DeepEqual(got, expected) {
+			t.Fatalf("metadata[%q] = %#v, want %#v", key, got, expected)
+		}
+	}
+	if got := resp.Auth.Metadata["type"]; got != credentialProvider {
+		t.Fatalf("type = %#v", got)
+	}
+	if got := resp.Auth.Metadata["email"]; got != want["email"] {
+		t.Fatalf("email = %#v", got)
+	}
+	if got := resp.Auth.Metadata["oauth_provider"]; got != entryForSite("zai") {
+		t.Fatalf("oauth_provider = %#v", got)
+	}
+	for key := range credentialKeys {
+		if _, ok := resp.Auth.Metadata[key]; ok {
+			t.Fatalf("metadata[%q] echoed the credential; a stale copy would overwrite refreshed storage", key)
+		}
+	}
+	if string(resp.Auth.StorageJSON) != string(body) {
+		t.Fatal("storage did not round-trip the auth file")
 	}
 }

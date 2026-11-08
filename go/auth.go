@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"reflect"
 	"strings"
 	"time"
 
@@ -347,11 +348,11 @@ func parseAuth(req pluginapi.AuthParseRequest) pluginapi.AuthParseResponse {
 	if _, err := siteForProvider(req.Provider); err != nil {
 		return pluginapi.AuthParseResponse{}
 	}
-	var metadata struct {
+	var persisted struct {
 		Type  string `json:"type"`
 		Email string `json:"email"`
 	}
-	if json.Unmarshal(req.RawJSON, &metadata) != nil || metadata.Type != credentialProvider {
+	if json.Unmarshal(req.RawJSON, &persisted) != nil || persisted.Type != credentialProvider {
 		return pluginapi.AuthParseResponse{}
 	}
 	c, err := readCredential(req.RawJSON)
@@ -362,12 +363,61 @@ func parseAuth(req pluginapi.AuthParseRequest) pluginapi.AuthParseResponse {
 	if name == "" {
 		name = req.Path
 	}
-	a := pluginapi.AuthData{Provider: credentialProvider, ID: name, FileName: req.FileName, Label: metadata.Email, StorageJSON: append([]byte(nil), req.RawJSON...), Metadata: map[string]any{"email": metadata.Email, "type": credentialProvider}}
-	a.Metadata["oauth_provider"] = entryForSite(c.Site)
+	// The auth file also carries the host-managed metadata the management API
+	// writes next to the credential (note, prefix, priority, proxy_url, and the
+	// rest). CPA rebuilds the runtime record from this map on every reload, so a
+	// parser that answers with identity keys alone makes those fields look
+	// unpersisted the moment the file is re-read.
+	metadata := persistedMetadata(req.RawJSON, c)
+	metadata["email"] = persisted.Email
+	metadata["type"] = credentialProvider
+	metadata["oauth_provider"] = entryForSite(c.Site)
+	a := pluginapi.AuthData{Provider: credentialProvider, ID: name, FileName: req.FileName, Label: persisted.Email, StorageJSON: append([]byte(nil), req.RawJSON...), Metadata: metadata}
 	if c.Key == "" {
 		if exp := jwtExpiry(c.JWT); exp > 0 {
 			a.NextRefreshAfter = time.Unix(exp, 0).UTC()
 		}
 	}
 	return pluginapi.AuthParseResponse{Handled: true, Auth: a}
+}
+
+// persistedMetadata returns the host-managed fields of an auth file: everything
+// the management API writes next to the credential (note, prefix, priority,
+// proxy_url, headers, excluded models, model aliases, request retry, ...). CPA
+// rebuilds the runtime record from this map on every reload, so a parser that
+// answers with identity keys alone makes those fields read back as unpersisted.
+//
+// The credential's own fields are removed: they are carried by StorageJSON, and
+// the host merges metadata over storage when it saves, so echoing them here
+// would let a value captured at parse time overwrite a refreshed credential.
+func persistedMetadata(raw []byte, own any) map[string]any {
+	var metadata map[string]any
+	if json.Unmarshal(raw, &metadata) != nil || metadata == nil {
+		return make(map[string]any)
+	}
+	for _, key := range credentialJSONKeys(own) {
+		delete(metadata, key)
+	}
+	return metadata
+}
+
+// credentialJSONKeys lists the JSON names a credential struct owns, so
+// persistedMetadata can keep them out of the host-managed map.
+func credentialJSONKeys(own any) []string {
+	t := reflect.TypeOf(own)
+	for t != nil && t.Kind() == reflect.Pointer {
+		t = t.Elem()
+	}
+	if t == nil || t.Kind() != reflect.Struct {
+		return nil
+	}
+	keys := make([]string, 0, t.NumField())
+	for i := 0; i < t.NumField(); i++ {
+		name, _, _ := strings.Cut(t.Field(i).Tag.Get("json"), ",")
+		if name == "" || name == "-" {
+			continue
+		}
+		keys = append(keys, name)
+	}
+	return keys
 }
