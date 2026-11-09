@@ -611,12 +611,27 @@ func TestErrorClassification(t *testing.T) {
 		want        string
 		outStatus   int
 		retry, risk bool
-	}{{"user cap", 429, `{"code":3008}`, "3008", 429, true, false}, {"model cap", 429, `{"error":{"code":"3009"}}`, "3009", 429, true, false}, {"balance", 200, `{"code":1113}`, "quota_exhausted", 429, false, false}, {"quota", 200, `{"error":{"code":1005}}`, "quota_exhausted", 429, false, false}, {"generic 429", 429, `{}`, "quota_exhausted", 429, false, false}, {"risk", 405, `{"code":3012}`, "force_cooldown", 403, false, true}, {"unusual", 403, `{"message":"unusual activity"}`, "force_cooldown", 403, false, true}, {"WAF", 403, `<html>errors.aliyun.com</html>`, "request_scoped", 400, false, false}, {"5xx", 503, `{}`, "upstream_error", 503, false, false}}
+		wide        bool
+	}{
+		{"user cap", 429, `{"code":3008}`, "3008", 429, true, false, false},
+		{"model cap", 429, `{"error":{"code":"3009"}}`, "3009", 429, true, false, false},
+		{"balance", 200, `{"code":1113}`, "quota_exhausted", 429, false, false, true},
+		{"quota", 200, `{"error":{"code":1005}}`, "quota_exhausted", 429, false, false, true},
+		{"generic 429", 429, `{}`, "quota_exhausted", 429, false, false, true},
+		{"risk", 405, `{"code":3012}`, "force_cooldown", 403, false, true, false},
+		{"unusual", 403, `{"message":"unusual activity"}`, "force_cooldown", 403, false, true, false},
+		{"WAF", 403, `<html>errors.aliyun.com</html>`, "request_scoped", 400, false, false, false},
+		{"5xx", 503, `{}`, "upstream_error", 503, false, false, false},
+	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			d := classify(tc.status, nil, []byte(tc.body))
 			if d.Code != tc.want || d.Status != tc.outStatus || d.Retry != tc.retry || d.Risk != tc.risk {
 				t.Fatalf("decision=%+v", d)
+			}
+			var perr *pluginabi.Error
+			if err := decisionError(d); !errors.As(err, &perr) || perr.CredentialScoped != tc.wide {
+				t.Fatalf("decisionError=%#v", err)
 			}
 		})
 	}

@@ -199,6 +199,9 @@ type disposition struct {
 	Message    string
 	Risk       bool
 	RetryAfter int
+	// CredentialWide marks a refusal that spends the account's Coding Plan quota,
+	// which every model of the credential draws from.
+	CredentialWide bool
 }
 
 func errorCode(raw []byte) string {
@@ -254,7 +257,9 @@ func classify(status int, headers http.Header, body []byte) disposition {
 		return disposition{Retry: true, Code: code, Status: 429, Message: "ZCode concurrency limit reached (code " + code + ")", RetryAfter: hint}
 	}
 	if code == "1113" || code == "1005" || status == 429 {
-		return disposition{Code: "quota_exhausted", Status: 429, Message: "ZCode quota exhausted (code " + code + ")", RetryAfter: hint}
+		// The Coding Plan's quota is account-level; the gift-bucket refusal in
+		// prepareRequest is per model and deliberately stays model-scoped.
+		return disposition{Code: "quota_exhausted", Status: 429, Message: "ZCode quota exhausted (code " + code + ")", RetryAfter: hint, CredentialWide: true}
 	}
 	if status >= 400 {
 		return disposition{Code: "upstream_error", Status: status, Message: fmt.Sprintf("ZCode upstream failed (HTTP %d, code %s)", status, code)}
@@ -264,6 +269,7 @@ func classify(status int, headers http.Header, body []byte) disposition {
 func decisionError(d disposition) error {
 	err := pluginabi.NewError(d.Code, d.Message, d.Status)
 	err.RetryAfterSeconds = d.RetryAfter
+	err.CredentialScoped = d.CredentialWide
 	return err
 }
 

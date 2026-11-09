@@ -55,7 +55,8 @@ instead of one entry plus a `site` dropdown.
 
 On a panel that renders per-entry metadata (CPA v8.0.51+) each entry appears as
 its own card with its own name and logo. Those need **CPA v8.0.49+ to load**, and
-v8.0.51+ for the separate names and artwork.
+v8.0.51+ for the separate names and artwork. A quota `429` cools the whole
+credential on **CPA v8.0.62+**; an older host cools only the reporting model.
 
 - Pick the portal by picking its entry. The entry wins over any `site` hint.
 - `site` (default `zai`) is now only the fallback for a login request that names

@@ -15,6 +15,9 @@
   name and logo (`oauth_provider_entries`) first shipped in v8.0.51. On an older host
   both entries still work — a panel that predates the field shows one card per
   *identifier* decorated with the plugin's own name and logo.
+- **CPA v8.0.62 or later** for credential-wide cooldowns: an account-level `429`
+  cools every model of the credential. An older host ignores the scope and cools
+  only the reporting model.
 - Go 1.27.1 for local development. Release builds are produced by CI.
 
 The dynamic dependencies observed in the v0.1.3 archives set that release's floor: the
@@ -238,7 +241,11 @@ is unavailable. Resets stay on the vendor website.
   upstream SSE untouched; every other client (Chat Completions, Responses,
   Gemini) gets exactly one `data:` event per chunk, because CPA's converters
   only parse a chunk that starts at byte zero with `data:` and holds one event.
-- `1005`, `1113` and other quota `429` responses cool the reporting credential.
+- `1005`, `1113` and other quota `429` responses are reported as credential-wide:
+  the Coding Plan's quota is shared by every model, so CPA v8.0.62+ cools all of
+  them until the stated `Retry-After`. The gift-bucket refusal (`no usable ZCode
+  gift bucket for requested model`) and the `3008`/`3009` concurrency retries stay
+  model-scoped.
 - Aliyun WAF HTML is surfaced as a network/IP block, not an account failure.
 - `405` with `3012` or `unusual activity` is terminal for the account. The
   plugin never retries it and writes `.zcode-risk-<hash>.blocked` in the auth
