@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  Native Z.ai / BigModel OAuth login for
+  Native Z.ai / BigModel OAuth login adapted for Oh-My-CPA, compatible with
   <a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a>
 </p>
 
