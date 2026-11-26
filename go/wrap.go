@@ -224,6 +224,27 @@ func prepareBody(raw []byte, c credential, model, sid string, gift bool) ([]byte
 		return nil, false, errors.New("messages array required")
 	}
 	body["model"] = model
+	// The host's openai→claude translator rewrites reasoning_effort into a
+	// thinking.budget_tokens number (max is 128000) because the model is not in
+	// the claude registry. ZCode reads output_config.effort instead, so undo the
+	// budget here; a body that already carries output_config.effort is left as is.
+	if _, ok := body["output_config"]; !ok {
+		if thinking, ok := asMap(body["thinking"])["type"]; ok && thinking == "enabled" {
+			if budget, ok := asMap(body["thinking"])["budget_tokens"].(float64); ok && budget > 0 {
+				effort := "low"
+				switch {
+				case budget >= 65536:
+					effort = "max"
+				case budget > 24576:
+					effort = "xhigh"
+				case budget > 1024:
+					effort = "high"
+				}
+				body["thinking"] = map[string]any{"type": "adaptive"}
+				body["output_config"] = map[string]any{"effort": effort}
+			}
+		}
+	}
 	renamed := searchless(body)
 	meta := asMap(body["metadata"])
 	existing, _ := meta["user_id"].(string)

@@ -1077,3 +1077,41 @@ func TestParseAuthPreservesManagementFields(t *testing.T) {
 		t.Fatal("storage did not round-trip the auth file")
 	}
 }
+
+func TestThinkingBudgetBecomesClaudeEffort(t *testing.T) {
+	setAuthDir(t.TempDir())
+	sender := &fakeSender{reply: func(r pluginapi.HTTPRequest) (pluginapi.HTTPResponse, error) {
+		t := &testing.T{}
+		t.Fatalf("unexpected upstream call")
+		return pluginapi.HTTPResponse{}, nil
+	}}
+	c := credential{Site: "zai", Key: "key.fake", Device: "00000000-0000-4000-8000-000000000002", UID: "uid"}
+	for _, tc := range []struct{ name, body, want string }{
+		{"max", `"thinking":{"type":"enabled","budget_tokens":128000}`, "max"},
+		{"high", `"thinking":{"type":"enabled","budget_tokens":24576}`, "high"},
+		{"xhigh", `"thinking":{"type":"enabled","budget_tokens":32768}`, "xhigh"},
+		{"low", `"thinking":{"type":"enabled","budget_tokens":1024}`, "low"},
+		{"native", `"thinking":{"type":"adaptive"},"output_config":{"effort":"max"}`, "max"},
+	} {
+		payload := []byte(`{"model":"GLM-5.4","max_tokens":8,"messages":[{"role":"user","content":"hi"}],` + tc.body + `}`)
+		req := pluginapi.ExecutorRequest{AuthID: "fixture", Model: "GLM-5.4", Payload: payload, StorageJSON: storage(c)}
+		plan, err := prepareRequest(req, sender)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var body map[string]any
+		if json.Unmarshal(plan.HTTP.Body, &body) != nil {
+			t.Fatal("invalid body")
+		}
+		thinking := asMap(body["thinking"])
+		if thinking["type"] != "adaptive" {
+			t.Fatalf("%s: thinking = %v, want adaptive", tc.name, thinking)
+		}
+		if _, ok := thinking["budget_tokens"]; ok {
+			t.Fatalf("%s: budget_tokens survived", tc.name)
+		}
+		if got := asMap(body["output_config"])["effort"]; got != tc.want {
+			t.Fatalf("%s: output_config.effort = %v, want %q", tc.name, got, tc.want)
+		}
+	}
+}
