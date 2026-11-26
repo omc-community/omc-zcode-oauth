@@ -39,7 +39,7 @@ plugins:
       enabled: true
       mode: own
       max_concurrency: 3
-      app_version: 3.16.3
+      app_version: 4.0.0
       team_language: en
       # zai (default) or bigmodel. Login goes straight to that vendor's
       # authorize page; a site in the authenticated auth-url request overrides it.

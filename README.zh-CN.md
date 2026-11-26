@@ -116,7 +116,7 @@ plugins:
 | `site` | 枚举 | `zai` | 未指定入口时的兜底门户：`zai`、`bigmodel` |
 | `mode` | 枚举 | `own` | `own`、`team` |
 | `max_concurrency` | 整数 | `3` | 每凭证 1–100 个并发请求 |
-| `app_version` | 字符串 | `3.16.3` | ZCode 客户端版本 |
+| `app_version` | 字符串 | `4.0.0` | ZCode 客户端版本 |
 | `team_language` | 枚举 | `en` | `zh`、`en` |
 | `public_base_url` | 字符串 | 空 | 兼容旧配置的 URL，仍校验但不用于原生 OAuth |
 
