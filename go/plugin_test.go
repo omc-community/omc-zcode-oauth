@@ -616,6 +616,7 @@ func TestErrorClassification(t *testing.T) {
 		{"user cap", 429, `{"code":3008}`, "3008", 429, true, false, false},
 		{"model cap", 429, `{"error":{"code":"3009"}}`, "3009", 429, true, false, false},
 		{"balance", 200, `{"code":1113}`, "quota_exhausted", 429, false, false, true},
+		{"overload", 200, `{"code":1305}`, "1305", 429, true, false, false},
 		{"quota", 200, `{"error":{"code":1005}}`, "quota_exhausted", 429, false, false, true},
 		{"generic 429", 429, `{}`, "quota_exhausted", 429, false, false, true},
 		{"risk", 405, `{"code":3012}`, "force_cooldown", 403, false, true, false},
@@ -682,7 +683,7 @@ func TestBusyRetriesReuseBytes(t *testing.T) {
 	var bodies [][]byte
 	sender := &fakeSender{reply: func(r pluginapi.HTTPRequest) (pluginapi.HTTPResponse, error) {
 		bodies = append(bodies, append([]byte(nil), r.Body...))
-		if len(bodies) <= 6 {
+		if len(bodies) <= 2 {
 			return pluginapi.HTTPResponse{StatusCode: 429, Body: []byte(`{"code":3008}`)}, nil
 		}
 		return pluginapi.HTTPResponse{StatusCode: 200, Body: []byte(`{"type":"message","content":[]}`)}, nil
@@ -692,7 +693,7 @@ func TestBusyRetriesReuseBytes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(actual) != len(waits) || len(bodies) != 7 {
+	if len(actual) != len(waits) || len(bodies) != len(waits)+1 {
 		t.Fatalf("waits=%d asks=%d", len(actual), len(bodies))
 	}
 	for i := range waits {
@@ -1169,5 +1170,37 @@ func TestDumpRequestWritesOnlyWhenConfigured(t *testing.T) {
 	dumpRequest("GLM-5.4", "-in", []byte(`{}`))
 	if _, err := os.Stat(filepath.Join(dir, "req-GLM-5.4-in.json")); !os.IsNotExist(err) {
 		t.Fatalf("wrote without a dump directory: %v", err)
+	}
+}
+
+// A Start Plan credential also carries the coding key, but that key has no
+// Coding Plan subscription: api.z.ai answers 1113 for every model while the
+// Start Plan balance shows the model's daily bucket unused. The plan name, not
+// the presence of a key, must decide which upstream and which auth is used.
+func TestStartPlanCredentialWithKeyUsesStartPlanPath(t *testing.T) {
+	setAuthDir(t.TempDir())
+	now := time.Now().Unix()
+	sender := &fakeSender{reply: func(r pluginapi.HTTPRequest) (pluginapi.HTTPResponse, error) {
+		if strings.Contains(r.URL, "billing/balance") {
+			return jsonReply(fixtureBalance(now)), nil
+		}
+		t.Fatalf("unexpected upstream call: %s", r.URL)
+		return pluginapi.HTTPResponse{}, nil
+	}}
+	c := credential{Site: "zai", Key: "coding.fake", JWT: "jwt.fake", Device: "00000000-0000-4000-8000-000000000007", UID: "uid", Plan: "ZCode Start Plan"}
+	payload := []byte(`{"model":"GLM-5.3-Flash","messages":[{"role":"user","content":"hi"}],"max_tokens":16}`)
+	req := pluginapi.ExecutorRequest{AuthID: "fixture", Model: "GLM-5.3-Flash", Payload: payload, StorageJSON: storage(c)}
+	plan, err := prepareRequest(req, sender)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !plan.Gift || plan.HTTP.URL != zcodeRoot+"/api/v1/zcode-plan/anthropic/v1/messages" {
+		t.Fatalf("Start Plan credential with a coding key did not use the Start Plan path: gift=%v url=%s", plan.Gift, plan.HTTP.URL)
+	}
+	if got := plan.HTTP.Headers.Get("Authorization"); got != "Bearer "+c.JWT {
+		t.Fatalf("authorization = %q, want the session token", got)
+	}
+	if plan.HTTP.Headers.Get("x-api-key") != "" {
+		t.Fatal("coding key leaked onto the Start Plan request")
 	}
 }
