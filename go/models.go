@@ -115,6 +115,10 @@ func fallbackModels() []pluginapi.ModelInfo {
 	return []pluginapi.ModelInfo{
 		modelInfo("GLM-5.3", 1000000, 128000, []string{"low", "high", "max"}),
 		modelInfo("GLM-5.3-Flash", 1000000, 128000, []string{"low", "high", "max"}),
+		// 5.4 is the migration target of 5.3/5.3-Flash (draftModelMigration in
+		// client/configs) and carries no reasoning entry of its own, so it takes
+		// the same levels; without them the host caps the effort at high.
+		modelInfo("GLM-5.4", 1000000, 128000, []string{"low", "high", "max"}),
 		modelInfo("GLM-5.2", 1000000, 128000, []string{"none", "high", "max"}),
 		modelInfo("GLM-5-Turbo", 200000, 64000, []string{"none", "high"}),
 	}
@@ -124,7 +128,15 @@ func modelInfo(id string, context, output int64, levels []string) pluginapi.Mode
 	// The routing model ID is lowercase: ZCode echoes lowercase model names and
 	// CPA only resolves an uppercase request against a lowercase registration,
 	// never the other way round. The vendor spelling stays in the display fields.
-	return pluginapi.ModelInfo{ID: strings.ToLower(id), Name: id, DisplayName: id, Object: "model", OwnedBy: "zcode", Type: "zcode", ContextLength: context, InputTokenLimit: context, MaxCompletionTokens: output, OutputTokenLimit: output, Thinking: &pluginapi.ThinkingSupport{Levels: levels}}
+	// ZeroAllowed must be set: the host reads capability from Min/Max plus
+	// Levels, and a support block with levels but neither budget bound nor
+	// ZeroAllowed is not recognised as level-only, so effort=max is clamped to
+	// high before the request leaves.
+	// UserDefined keeps the host from re-deriving the effort: it maps the
+	// request level to a budget (max -> 128000) and clamps that back through
+	// ConvertBudgetToLevel, which has no "max" and lands on xhigh -> high.
+	// The vendor accepts the level verbatim, so pass it through untouched.
+	return pluginapi.ModelInfo{ID: strings.ToLower(id), Name: id, DisplayName: id, Object: "model", OwnedBy: "zcode", Type: "zcode", ContextLength: context, InputTokenLimit: context, MaxCompletionTokens: output, OutputTokenLimit: output, UserDefined: true, Thinking: &pluginapi.ThinkingSupport{ZeroAllowed: true, Levels: levels}}
 }
 func catalogModels(doc *catalog, c credential) []pluginapi.ModelInfo {
 	if doc == nil {
@@ -155,6 +167,10 @@ func catalogModels(doc *catalog, c credential) []pluginapi.ModelInfo {
 			}
 		}
 	}
+	// 5.4 is the migration target of 5.3/5.3-Flash and carries no reasoning
+	// entry of its own in the vendor catalogue; give it the levels of the models
+	// it replaces so the host does not cap the effort at high.
+	add("GLM-5.4")
 	for _, r := range doc.Config.ModelConfigRules.BuiltinProviderModelRules {
 		if r.ProviderID != plan {
 			continue

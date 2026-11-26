@@ -931,7 +931,8 @@ func TestModelsFromVendorCatalogAndGiftBalance(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(response.Models) != 1 || response.Models[0].ID != "glm-5.3-flash" || response.Models[0].DisplayName != "GLM-5.3-Flash" || response.Models[0].ContextLength != 900000 || response.Models[0].MaxCompletionTokens != 120000 || response.Models[0].Thinking.Levels[0] != "none" {
+	// The migration target 5.4 is always offered, so a catalogue of one is two.
+	if len(response.Models) != 2 || response.Models[0].ID != "glm-5.3-flash" || response.Models[0].DisplayName != "GLM-5.3-Flash" || response.Models[0].ContextLength != 900000 || response.Models[0].MaxCompletionTokens != 120000 || response.Models[0].Thinking.Levels[0] != "none" {
 		t.Fatalf("wrong catalog models: %v", len(response.Models))
 	}
 }
