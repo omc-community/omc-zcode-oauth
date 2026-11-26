@@ -11,6 +11,7 @@ import (
 	"os"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -27,7 +28,11 @@ var prompt struct {
 		InvokedLine    string `json:"invokedLine"`
 		PlatformLabel  string `json:"platformLabel"`
 		OSVersionLabel string `json:"osVersionLabel"`
-		PoweredByLine  string `json:"poweredByLine"`
+		CwdLabel       string `json:"cwdLabel"`
+		GitLabel       string `json:"gitLabel"`
+		GitNo          string `json:"gitNo"`
+		ShellLabel     string `json:"shellLabel"`
+		UntrustedNote  string `json:"untrustedNote"`
 	} `json:"environment"`
 	Context struct {
 		Intro              string `json:"intro"`
@@ -95,7 +100,7 @@ func clientTimezone() string {
 	}
 	return "unknown"
 }
-func giftHeaders(jwt, sid string) (http.Header, error) {
+func giftHeaders(jwt, sid, queryID string) (http.Header, error) {
 	requestID, err := randomUUID()
 	if err != nil {
 		return nil, err
@@ -112,9 +117,15 @@ func giftHeaders(jwt, sid string) (http.Header, error) {
 	} else {
 		category = "linux"
 	}
-	return http.Header{
+	h := http.Header{
 		"Content-Type": {"application/json"}, "Authorization": {"Bearer " + jwt}, "Anthropic-Version": {"2023-06-01"}, "Http-Referer": {"https://zcode.z.ai"}, "User-Agent": {"ZCode/" + getConfig().AppVersion + " ai-sdk/anthropic/3.0.81"}, "X-Zcode-App-Version": {getConfig().AppVersion}, "X-Title": {"Z Code@cli"}, "X-Release-Channel": {"production"}, "X-Client-Language": {clientLanguage()}, "X-Client-Timezone": {clientTimezone()}, "X-Zcode-Agent": {"glm"}, "X-Platform": {zcodePlatform()}, "X-Os-Category": {category}, "X-Os-Version": {osRelease()}, "X-Request-Id": {requestID}, "X-Zcode-Session-Type": {"main"}, "X-Zcode-Trace-Id": {traceID}, "X-Zcode-Query-Source": {"main_turn"}, "X-Session-Id": {sid},
-	}, nil
+	}
+	// createModelRequestAttributionHeaders: one id per user turn, shared by the
+	// tool calls inside it.
+	if queryID != "" {
+		h.Set("X-Query-Id", queryID)
+	}
+	return h, nil
 }
 func asMap(v any) map[string]any {
 	if m, ok := v.(map[string]any); ok && m != nil {
@@ -237,20 +248,28 @@ func prepareBody(raw []byte, c credential, model, sid string, gift bool) ([]byte
 			}
 		}
 		e := prompt.Environment
-		provider := "zai-api"
-		if c.Site == "bigmodel" {
-			provider = "bigmodel-api"
-		}
+		// buildEnvInfoContent (core/src/context/sections/env-info.ts): heading,
+		// the invoked line with its trailing space, then cwd, git, platform,
+		// shell, os version and the untrusted-downloads note, each " - " prefixed.
 		osname := runtime.GOOS
 		if osname == "windows" {
 			osname = "win32"
 		}
-		arch := runtime.GOARCH
-		if arch == "amd64" {
-			arch = "x64"
+		shell := os.Getenv("SHELL")
+		if shell == "" {
+			shell = "/bin/bash"
 		}
-		powered := strings.ReplaceAll(strings.ReplaceAll(e.PoweredByLine, "{provider}", provider), "{model}", model)
-		environment := strings.Join([]string{e.Heading, e.InvokedLine, "- " + e.PlatformLabel + ": " + osname, "- " + e.OSVersionLabel + ": " + osname + " " + osRelease() + " " + arch, powered}, "\n")
+		cwd, _ := os.Getwd()
+		environment := strings.Join([]string{
+			e.Heading,
+			e.InvokedLine,
+			" - " + e.CwdLabel + ": " + cwd,
+			" - " + e.GitLabel + ": " + e.GitNo,
+			" - " + e.PlatformLabel + ": " + osname,
+			" - " + e.ShellLabel + ": " + shell,
+			" - " + e.OSVersionLabel + ": " + osRelease(),
+			" - " + e.UntrustedNote,
+		}, "\n")
 		dynamic := append([]string{prompt.BeforeEnvironment, environment, prompt.AfterEnvironment}, own...)
 		body["system"] = []any{cachedText(prompt.CliPrefix), cachedText(strings.Join(prompt.StableSections, "\n\n")), cachedText("\n\n" + strings.Join(dynamic, "\n\n"))}
 		date := time.Now().Format("2006-01-02")
@@ -295,4 +314,44 @@ func prepareBody(raw []byte, c credential, model, sid string, gift bool) ([]byte
 	}
 	out, err := json.Marshal(body)
 	return out, renamed, err
+}
+
+// queryID is the request's x-query-id, as the official client's
+// createModelRequestAttributionHeaders sends it: one id per user turn, shared
+// by the tool calls inside it. The vendor's own id is not in the request, so
+// the plugin derives a stable one from the session and the number of user
+// turns so far; a body that does not read gives none.
+func queryID(raw []byte, sid string) string {
+	var body map[string]any
+	if json.Unmarshal(raw, &body) != nil {
+		return ""
+	}
+	messages, ok := body["messages"].([]any)
+	if !ok {
+		return ""
+	}
+	n := 0
+	for _, v := range messages {
+		m, ok := v.(map[string]any)
+		if !ok || m["role"] != "user" {
+			continue
+		}
+		switch c := m["content"].(type) {
+		case string:
+			if strings.TrimSpace(c) != "" {
+				n++
+			}
+		case []any:
+			for _, x := range c {
+				if b, ok := x.(map[string]any); ok && b["type"] != "tool_result" {
+					n++
+					break
+				}
+			}
+		}
+	}
+	if n == 0 {
+		return ""
+	}
+	return "query_" + stableUUID("zcode-query\x00"+sid+"\x00"+strconv.Itoa(n))
 }

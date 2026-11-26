@@ -169,7 +169,7 @@ func prepareRequest(req pluginapi.ExecutorRequest, sender httpSender) (requestPl
 	profile := (*pluginapi.HTTPWireProfile)(nil)
 	if gift {
 		target = zcodeRoot + "/api/v1/zcode-plan/anthropic/v1/messages"
-		headers, err = giftHeaders(c.JWT, sid)
+		headers, err = giftHeaders(c.JWT, sid, queryID(req.Payload, sid))
 		if err != nil {
 			return plan, pluginabi.NewError("random_error", "cannot create request ID", 500)
 		}

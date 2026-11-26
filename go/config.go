@@ -22,7 +22,7 @@ var configMu sync.RWMutex
 var currentConfig = defaults()
 
 func defaults() config {
-	return config{Mode: "own", MaxConcurrency: 3, AppVersion: "3.16.3", TeamLanguage: "en", Site: "zai"}
+	return config{Mode: "own", MaxConcurrency: 3, AppVersion: "4.0.0", TeamLanguage: "en", Site: "zai"}
 }
 func getConfig() config { configMu.RLock(); defer configMu.RUnlock(); return currentConfig }
 func configure(raw []byte) error {

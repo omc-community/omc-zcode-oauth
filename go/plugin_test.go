@@ -49,7 +49,7 @@ func osStatMode(path string) (os.FileMode, error) {
 }
 
 func TestEmbeddedPromptHashes(t *testing.T) {
-	cases := map[string]struct{ text, want string }{"cli": {prompt.CliPrefix, "46dd360a22c87a92"}, "stable0": {prompt.StableSections[0], "3f21ff9a88a03a76"}, "stable1": {prompt.StableSections[1], "39a1e86c93452c01"}, "before": {prompt.BeforeEnvironment, "bbdc66b399d297ff"}, "after": {prompt.AfterEnvironment, "1732b7f098a925d7"}}
+	cases := map[string]struct{ text, want string }{"cli": {prompt.CliPrefix, "7779642ea44a4696"}, "stable0": {prompt.StableSections[0], "aac4ba4cc7b555b3"}, "stable1": {prompt.StableSections[1], "86e0396775d5ed0e"}, "before": {prompt.BeforeEnvironment, "7d843753f3adae93"}, "after": {prompt.AfterEnvironment, "406a0480d88086cd"}}
 	for name, c := range cases {
 		sum := sha256.Sum256([]byte(c.text))
 		if got := hex.EncodeToString(sum[:8]); got != c.want {
@@ -560,7 +560,7 @@ func TestGiftRequestWrapperAndPaidRoute(t *testing.T) {
 	if !plan.Gift || plan.HTTP.URL != zcodeRoot+"/api/v1/zcode-plan/anthropic/v1/messages" || strings.Contains(plan.HTTP.URL, "?") {
 		t.Fatalf("bad gift route")
 	}
-	if plan.HTTP.Headers.Get("Anthropic-Beta") != "" || len(plan.HTTP.Headers) != 19 {
+	if plan.HTTP.Headers.Get("Anthropic-Beta") != "" || len(plan.HTTP.Headers) != 20 {
 		t.Fatalf("gift headers count=%d leaked_beta=%v", len(plan.HTTP.Headers), plan.HTTP.Headers.Get("Anthropic-Beta") != "")
 	}
 	var body map[string]any
