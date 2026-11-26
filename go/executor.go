@@ -128,6 +128,8 @@ type requestPlan struct {
 
 func prepareRequest(req pluginapi.ExecutorRequest, sender httpSender) (requestPlan, error) {
 	var plan requestPlan
+	// Before the rest gate, so a refused turn still shows what was asked.
+	dumpRequest(req.Model, "-in", req.Payload)
 	c, err := readCredential(req.StorageJSON)
 	if err != nil {
 		return plan, pluginabi.NewError("invalid_auth", "invalid ZCode credential", 401)
@@ -316,6 +318,7 @@ func execute(req pluginapi.ExecutorRequest, sender httpSender) (pluginapi.Execut
 	if err != nil {
 		return pluginapi.ExecutorResponse{}, err
 	}
+	dumpRequest(req.Model, "-out", plan.HTTP.Body)
 	for attempt := 0; ; attempt++ {
 		resp, e := sender.Do(plan.HTTP)
 		if e != nil {
@@ -641,6 +644,7 @@ func executeStream(req pluginapi.ExecutorRequest, callbackID, streamID string, s
 		release()
 		return nil, err
 	}
+	dumpRequest(req.Model, "-out", plan.HTTP.Body)
 	for attempt := 0; ; attempt++ {
 		var response hostStreamResponse
 		err = hostRPC("host.http.do_stream", map[string]any{"host_callback_id": callbackID, "request": plan.HTTP}, &response)

@@ -1151,3 +1151,23 @@ func TestOpenAIToolsFlattenToAnthropic(t *testing.T) {
 		t.Fatalf("read input_schema = %v", tools[0])
 	}
 }
+
+func TestDumpRequestWritesOnlyWhenConfigured(t *testing.T) {
+	dir := t.TempDir()
+	dumpState.dir = dir
+	t.Cleanup(func() { dumpState.dir = "" })
+	dumpRequest("GLM-5.4", "-out", []byte(`{"model":"GLM-5.4"}`))
+	name := filepath.Join(dir, "req-GLM-5.4-out.json")
+	info, err := os.Stat(name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode().Perm() != 0o600 {
+		t.Fatalf("mode = %o, want 600", info.Mode().Perm())
+	}
+	dumpState.dir = ""
+	dumpRequest("GLM-5.4", "-in", []byte(`{}`))
+	if _, err := os.Stat(filepath.Join(dir, "req-GLM-5.4-in.json")); !os.IsNotExist(err) {
+		t.Fatalf("wrote without a dump directory: %v", err)
+	}
+}
