@@ -245,6 +245,25 @@ func prepareBody(raw []byte, c credential, model, sid string, gift bool) ([]byte
 			}
 		}
 	}
+	// The vendor 400s on the OpenAI nested tool shape ({"type":"function",
+	// "function":{...}}) and takes only the flat Anthropic one. The host no
+	// longer translates, so flatten here.
+	if tools, ok := body["tools"].([]any); ok {
+		flat := make([]any, 0, len(tools))
+		for _, v := range tools {
+			fn, nested := asMap(v)["function"].(map[string]any)
+			if !nested {
+				flat = append(flat, v)
+				continue
+			}
+			t := map[string]any{"name": fn["name"], "description": fn["description"]}
+			if schema, ok := fn["parameters"]; ok {
+				t["input_schema"] = schema
+			}
+			flat = append(flat, t)
+		}
+		body["tools"] = flat
+	}
 	renamed := searchless(body)
 	meta := asMap(body["metadata"])
 	existing, _ := meta["user_id"].(string)

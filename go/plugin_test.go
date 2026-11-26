@@ -1115,3 +1115,39 @@ func TestThinkingBudgetBecomesClaudeEffort(t *testing.T) {
 		}
 	}
 }
+
+func TestOpenAIToolsFlattenToAnthropic(t *testing.T) {
+	setAuthDir(t.TempDir())
+	sender := &fakeSender{reply: func(r pluginapi.HTTPRequest) (pluginapi.HTTPResponse, error) {
+		t := &testing.T{}
+		t.Fatalf("unexpected upstream call")
+		return pluginapi.HTTPResponse{}, nil
+	}}
+	c := credential{Site: "zai", Key: "key.fake", Device: "00000000-0000-4000-8000-000000000003", UID: "uid"}
+	payload := []byte(`{"model":"GLM-5.4","max_tokens":8,"messages":[{"role":"user","content":"hi"}],"tools":[{"type":"function","function":{"name":"read","description":"d","parameters":{"type":"object","properties":{"path":{"type":"string"}}}}},{"name":"Bash","description":"b","input_schema":{"type":"object"}}]}`)
+	req := pluginapi.ExecutorRequest{AuthID: "fixture", Model: "GLM-5.4", Payload: payload, StorageJSON: storage(c)}
+	plan, err := prepareRequest(req, sender)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var body map[string]any
+	if json.Unmarshal(plan.HTTP.Body, &body) != nil {
+		t.Fatal("invalid body")
+	}
+	tools := body["tools"].([]any)
+	if len(tools) != 2 {
+		t.Fatalf("tools = %d, want 2", len(tools))
+	}
+	for i, want := range []string{"read", "Bash"} {
+		tool := asMap(tools[i])
+		if _, nested := tool["function"]; nested {
+			t.Fatalf("tool %d still nested: %v", i, tool)
+		}
+		if tool["name"] != want {
+			t.Fatalf("tool %d name = %v, want %q", i, tool["name"], want)
+		}
+	}
+	if schema := asMap(asMap(tools[0])["input_schema"]); asMap(schema)["type"] != "object" {
+		t.Fatalf("read input_schema = %v", tools[0])
+	}
+}
