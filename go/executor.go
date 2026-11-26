@@ -636,6 +636,20 @@ func forwardStream(source, target string, plan requestPlan, callbackID string, d
 	}
 }
 
+// frameAnthropicMessage wraps a whole Anthropic message body as a single SSE
+// event when the client reads chat-completions frames. A body that already
+// carries "data:" or "event:" lines is left alone.
+func frameAnthropicMessage(raw []byte, dataOnly bool) []byte {
+	if !dataOnly || len(raw) == 0 {
+		return raw
+	}
+	trimmed := bytes.TrimSpace(raw)
+	if bytes.HasPrefix(trimmed, []byte("data:")) || bytes.HasPrefix(trimmed, []byte("event:")) {
+		return raw
+	}
+	return append(append([]byte("data: "), trimmed...), '\n', '\n')
+}
+
 // dataFramedChunks reports whether stream chunks must be re-framed as one
 // `data:` payload per upstream event. CPA rewrites SourceFormat to this plugin's
 // own input format, so the client protocol is read from the request path the
@@ -701,6 +715,11 @@ func executeStream(req pluginapi.ExecutorRequest, callbackID, streamID string, s
 			if plan.Renamed {
 				raw = restoreSearchName(raw)
 			}
+			// A non-SSE body (the shape ZCode returns for a refused turn) is one
+			// Anthropic message. The host's chat-completions converter only reads
+			// events that start with "data:", so frame it or the client sees an
+			// empty stream.
+			raw = frameAnthropicMessage(raw, dataFramedChunks(req))
 			release()
 			return map[string]any{"headers": response.Headers, "chunks": []pluginapi.ExecutorStreamChunk{{Payload: raw}}}, nil
 		}

@@ -1204,3 +1204,18 @@ func TestStartPlanCredentialWithKeyUsesStartPlanPath(t *testing.T) {
 		t.Fatal("coding key leaked onto the Start Plan request")
 	}
 }
+
+func TestFrameAnthropicMessage(t *testing.T) {
+	body := []byte(`{"type":"error","error":{"message":"nope"}}`)
+	if got := frameAnthropicMessage(body, false); string(got) != string(body) {
+		t.Fatalf("claude client: %q", got)
+	}
+	got := frameAnthropicMessage(body, true)
+	if string(got) != "data: "+string(body)+"\n\n" {
+		t.Fatalf("openai client: %q", got)
+	}
+	framed := []byte("data: {\"type\":\"ping\"}\n\n")
+	if got := frameAnthropicMessage(framed, true); string(got) != string(framed) {
+		t.Fatalf("already framed: %q", got)
+	}
+}
