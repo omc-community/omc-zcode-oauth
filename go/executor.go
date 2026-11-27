@@ -22,7 +22,19 @@ import (
 
 var waitFunc = time.Sleep
 
-var waits = []time.Duration{250 * time.Millisecond, 500 * time.Millisecond, 900 * time.Millisecond, 1600 * time.Millisecond, 2800 * time.Millisecond, 4000 * time.Millisecond}
+// waits is the official client's Start Plan busy retry: two waits, 1s then 2s,
+// then it gives up (START_PLAN_BUSY_MAIN_TURN_ADMISSION_RETRY_DELAYS_MS). A
+// retryable refusal therefore gets at most three asks, not seven.
+var waits = []time.Duration{1000 * time.Millisecond, 2000 * time.Millisecond}
+
+// retryWait is how long attempt (0-based) waits before its next try, and
+// whether there is one.
+func retryWait(d disposition, attempt int) (time.Duration, bool) {
+	if attempt < len(waits) {
+		return waits[attempt], true
+	}
+	return 0, false
+}
 
 type credentialGate struct {
 	cond   *sync.Cond
@@ -128,6 +140,8 @@ type requestPlan struct {
 
 func prepareRequest(req pluginapi.ExecutorRequest, sender httpSender) (requestPlan, error) {
 	var plan requestPlan
+	// Before the rest gate, so a refused turn still shows what was asked.
+	dumpRequest(req.Model, "-in", req.Payload)
 	c, err := readCredential(req.StorageJSON)
 	if err != nil {
 		return plan, pluginabi.NewError("invalid_auth", "invalid ZCode credential", 401)
@@ -143,7 +157,11 @@ func prepareRequest(req pluginapi.ExecutorRequest, sender httpSender) (requestPl
 	if model == "" {
 		return plan, pluginabi.NewError("invalid_request", "model is required", 400)
 	}
-	gift := c.Key == ""
+	// A Start Plan credential carries the coding key too, but that key has no
+	// Coding Plan subscription behind it: api.z.ai answers 1113 for every model
+	// while the Start Plan balance shows the model's daily bucket unused. The
+	// plan name is what decides the path, not the presence of a key.
+	gift := c.Key == "" || strings.Contains(c.Plan, "Start Plan")
 	if gift {
 		if c.JWT == "" {
 			return plan, pluginabi.NewError("invalid_auth", "ZCode gift sign-in required", 401)
@@ -169,7 +187,7 @@ func prepareRequest(req pluginapi.ExecutorRequest, sender httpSender) (requestPl
 	profile := (*pluginapi.HTTPWireProfile)(nil)
 	if gift {
 		target = zcodeRoot + "/api/v1/zcode-plan/anthropic/v1/messages"
-		headers, err = giftHeaders(c.JWT, sid)
+		headers, err = giftHeaders(c.JWT, sid, queryID(req.Payload, sid))
 		if err != nil {
 			return plan, pluginabi.NewError("random_error", "cannot create request ID", 500)
 		}
@@ -256,6 +274,12 @@ func classify(status int, headers http.Header, body []byte) disposition {
 	if code == "3008" || code == "3009" {
 		return disposition{Retry: true, Code: code, Status: 429, Message: "ZCode concurrency limit reached (code " + code + ")", RetryAfter: hint}
 	}
+	if code == "1305" {
+		// The model's own overload (the official client marks 1305 rate limited
+		// and retryable), not this credential's: ask again on the busy waits and
+		// then hand it back for the next account.
+		return disposition{Retry: true, Code: code, Status: 429, Message: "ZCode model overloaded (code 1305)", RetryAfter: hint}
+	}
 	if code == "1113" || code == "1005" || status == 429 {
 		// The Coding Plan's quota is account-level; the gift-bucket refusal in
 		// prepareRequest is per model and deliberately stays model-scoped.
@@ -316,6 +340,7 @@ func execute(req pluginapi.ExecutorRequest, sender httpSender) (pluginapi.Execut
 	if err != nil {
 		return pluginapi.ExecutorResponse{}, err
 	}
+	dumpRequest(req.Model, "-out", plan.HTTP.Body)
 	for attempt := 0; ; attempt++ {
 		resp, e := sender.Do(plan.HTTP)
 		if e != nil {
@@ -323,8 +348,8 @@ func execute(req pluginapi.ExecutorRequest, sender httpSender) (pluginapi.Execut
 		}
 		d := classify(resp.StatusCode, resp.Headers, resp.Body)
 		recordRisk(plan, &d)
-		if d.Retry && attempt < len(waits) {
-			waitFunc(waits[attempt])
+		if wait, ok := retryWait(d, attempt); d.Retry && ok {
+			waitFunc(wait)
 			continue
 		}
 		if d.Retry {
@@ -611,6 +636,20 @@ func forwardStream(source, target string, plan requestPlan, callbackID string, d
 	}
 }
 
+// frameAnthropicMessage wraps a whole Anthropic message body as a single SSE
+// event when the client reads chat-completions frames. A body that already
+// carries "data:" or "event:" lines is left alone.
+func frameAnthropicMessage(raw []byte, dataOnly bool) []byte {
+	if !dataOnly || len(raw) == 0 {
+		return raw
+	}
+	trimmed := bytes.TrimSpace(raw)
+	if bytes.HasPrefix(trimmed, []byte("data:")) || bytes.HasPrefix(trimmed, []byte("event:")) {
+		return raw
+	}
+	return append(append([]byte("data: "), trimmed...), '\n', '\n')
+}
+
 // dataFramedChunks reports whether stream chunks must be re-framed as one
 // `data:` payload per upstream event. CPA rewrites SourceFormat to this plugin's
 // own input format, so the client protocol is read from the request path the
@@ -641,6 +680,7 @@ func executeStream(req pluginapi.ExecutorRequest, callbackID, streamID string, s
 		release()
 		return nil, err
 	}
+	dumpRequest(req.Model, "-out", plan.HTTP.Body)
 	for attempt := 0; ; attempt++ {
 		var response hostStreamResponse
 		err = hostRPC("host.http.do_stream", map[string]any{"host_callback_id": callbackID, "request": plan.HTTP}, &response)
@@ -660,8 +700,8 @@ func executeStream(req pluginapi.ExecutorRequest, callbackID, streamID string, s
 			}
 			d := classify(response.StatusCode, response.Headers, raw)
 			recordRisk(plan, &d)
-			if d.Retry && attempt < len(waits) {
-				waitFunc(waits[attempt])
+			if wait, ok := retryWait(d, attempt); d.Retry && ok {
+				waitFunc(wait)
 				continue
 			}
 			if d.Retry {
@@ -675,6 +715,11 @@ func executeStream(req pluginapi.ExecutorRequest, callbackID, streamID string, s
 			if plan.Renamed {
 				raw = restoreSearchName(raw)
 			}
+			// A non-SSE body (the shape ZCode returns for a refused turn) is one
+			// Anthropic message. The host's chat-completions converter only reads
+			// events that start with "data:", so frame it or the client sees an
+			// empty stream.
+			raw = frameAnthropicMessage(raw, dataFramedChunks(req))
 			release()
 			return map[string]any{"headers": response.Headers, "chunks": []pluginapi.ExecutorStreamChunk{{Payload: raw}}}, nil
 		}

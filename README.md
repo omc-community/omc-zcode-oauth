@@ -127,7 +127,7 @@ Releases are created by GitHub Actions whenever a `v*` tag is pushed.
 | `site` | enum | `zai` | Fallback portal when a login request names no entry: `zai`, `bigmodel` |
 | `mode` | enum | `own` | `own`, `team` |
 | `max_concurrency` | integer | `3` | 1–100 requests per credential |
-| `app_version` | string | `3.16.3` | ZCode client version |
+| `app_version` | string | `4.0.0` | ZCode client version |
 | `team_language` | enum | `en` | `zh`, `en` |
 | `public_base_url` | string | empty | Legacy URL, accepted and validated for compatibility; unused by native OAuth |
 

@@ -50,7 +50,7 @@ func registration() any {
 		{Name: "site", Type: pluginapi.ConfigFieldTypeEnum, EnumValues: []string{"zai", "bigmodel"}, Description: "Fallback sign-in site for a login request that names no entry: zai (the default) or bigmodel. The panel's Z.AI / BigModel sign-in entries pick their own site and do not read this."},
 		{Name: "mode", Type: pluginapi.ConfigFieldTypeEnum, EnumValues: []string{"own", "team"}, Description: "Default OAuth plan selection (default own)."},
 		{Name: "max_concurrency", Type: pluginapi.ConfigFieldTypeInteger, Description: "Maximum simultaneous requests per credential (default 3)."},
-		{Name: "app_version", Type: pluginapi.ConfigFieldTypeString, Description: "ZCode client version (default 3.16.3)."},
+		{Name: "app_version", Type: pluginapi.ConfigFieldTypeString, Description: "ZCode client version (default 4.0.0)."},
 		{Name: "team_language", Type: pluginapi.ConfigFieldTypeEnum, EnumValues: []string{"zh", "en"}, Description: "Team business API language (default en)."},
 		{Name: "public_base_url", Type: pluginapi.ConfigFieldTypeString, Description: "Legacy public base URL, retained for configuration compatibility. Native OAuth login uses the vendor URL and does not use this setting (default empty)."},
 	}}, "capabilities": map[string]any{"auth_provider": true, "model_provider": true, "executor": true, "executor_model_scope": "oauth", "executor_input_formats": []string{"claude"}, "executor_output_formats": []string{"claude"}, "quota_provider": true, "management_api": true}}

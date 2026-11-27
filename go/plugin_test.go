@@ -49,7 +49,7 @@ func osStatMode(path string) (os.FileMode, error) {
 }
 
 func TestEmbeddedPromptHashes(t *testing.T) {
-	cases := map[string]struct{ text, want string }{"cli": {prompt.CliPrefix, "46dd360a22c87a92"}, "stable0": {prompt.StableSections[0], "3f21ff9a88a03a76"}, "stable1": {prompt.StableSections[1], "39a1e86c93452c01"}, "before": {prompt.BeforeEnvironment, "bbdc66b399d297ff"}, "after": {prompt.AfterEnvironment, "1732b7f098a925d7"}}
+	cases := map[string]struct{ text, want string }{"cli": {prompt.CliPrefix, "7779642ea44a4696"}, "stable0": {prompt.StableSections[0], "aac4ba4cc7b555b3"}, "stable1": {prompt.StableSections[1], "86e0396775d5ed0e"}, "before": {prompt.BeforeEnvironment, "7d843753f3adae93"}, "after": {prompt.AfterEnvironment, "406a0480d88086cd"}}
 	for name, c := range cases {
 		sum := sha256.Sum256([]byte(c.text))
 		if got := hex.EncodeToString(sum[:8]); got != c.want {
@@ -560,7 +560,7 @@ func TestGiftRequestWrapperAndPaidRoute(t *testing.T) {
 	if !plan.Gift || plan.HTTP.URL != zcodeRoot+"/api/v1/zcode-plan/anthropic/v1/messages" || strings.Contains(plan.HTTP.URL, "?") {
 		t.Fatalf("bad gift route")
 	}
-	if plan.HTTP.Headers.Get("Anthropic-Beta") != "" || len(plan.HTTP.Headers) != 19 {
+	if plan.HTTP.Headers.Get("Anthropic-Beta") != "" || len(plan.HTTP.Headers) != 20 {
 		t.Fatalf("gift headers count=%d leaked_beta=%v", len(plan.HTTP.Headers), plan.HTTP.Headers.Get("Anthropic-Beta") != "")
 	}
 	var body map[string]any
@@ -616,6 +616,7 @@ func TestErrorClassification(t *testing.T) {
 		{"user cap", 429, `{"code":3008}`, "3008", 429, true, false, false},
 		{"model cap", 429, `{"error":{"code":"3009"}}`, "3009", 429, true, false, false},
 		{"balance", 200, `{"code":1113}`, "quota_exhausted", 429, false, false, true},
+		{"overload", 200, `{"code":1305}`, "1305", 429, true, false, false},
 		{"quota", 200, `{"error":{"code":1005}}`, "quota_exhausted", 429, false, false, true},
 		{"generic 429", 429, `{}`, "quota_exhausted", 429, false, false, true},
 		{"risk", 405, `{"code":3012}`, "force_cooldown", 403, false, true, false},
@@ -682,7 +683,7 @@ func TestBusyRetriesReuseBytes(t *testing.T) {
 	var bodies [][]byte
 	sender := &fakeSender{reply: func(r pluginapi.HTTPRequest) (pluginapi.HTTPResponse, error) {
 		bodies = append(bodies, append([]byte(nil), r.Body...))
-		if len(bodies) <= 6 {
+		if len(bodies) <= 2 {
 			return pluginapi.HTTPResponse{StatusCode: 429, Body: []byte(`{"code":3008}`)}, nil
 		}
 		return pluginapi.HTTPResponse{StatusCode: 200, Body: []byte(`{"type":"message","content":[]}`)}, nil
@@ -692,7 +693,7 @@ func TestBusyRetriesReuseBytes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(actual) != len(waits) || len(bodies) != 7 {
+	if len(actual) != len(waits) || len(bodies) != len(waits)+1 {
 		t.Fatalf("waits=%d asks=%d", len(actual), len(bodies))
 	}
 	for i := range waits {
@@ -930,7 +931,8 @@ func TestModelsFromVendorCatalogAndGiftBalance(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(response.Models) != 1 || response.Models[0].ID != "glm-5.3-flash" || response.Models[0].DisplayName != "GLM-5.3-Flash" || response.Models[0].ContextLength != 900000 || response.Models[0].MaxCompletionTokens != 120000 || response.Models[0].Thinking.Levels[0] != "none" {
+	// The migration target 5.4 is always offered, so a catalogue of one is two.
+	if len(response.Models) != 2 || response.Models[0].ID != "glm-5.3-flash" || response.Models[0].DisplayName != "GLM-5.3-Flash" || response.Models[0].ContextLength != 900000 || response.Models[0].MaxCompletionTokens != 120000 || response.Models[0].Thinking.Levels[0] != "none" {
 		t.Fatalf("wrong catalog models: %v", len(response.Models))
 	}
 }
@@ -1075,5 +1077,146 @@ func TestParseAuthPreservesManagementFields(t *testing.T) {
 	}
 	if string(resp.Auth.StorageJSON) != string(body) {
 		t.Fatal("storage did not round-trip the auth file")
+	}
+}
+
+func TestThinkingBudgetBecomesClaudeEffort(t *testing.T) {
+	setAuthDir(t.TempDir())
+	sender := &fakeSender{reply: func(r pluginapi.HTTPRequest) (pluginapi.HTTPResponse, error) {
+		t := &testing.T{}
+		t.Fatalf("unexpected upstream call")
+		return pluginapi.HTTPResponse{}, nil
+	}}
+	c := credential{Site: "zai", Key: "key.fake", Device: "00000000-0000-4000-8000-000000000002", UID: "uid"}
+	for _, tc := range []struct{ name, body, want string }{
+		{"max", `"thinking":{"type":"enabled","budget_tokens":128000}`, "max"},
+		{"high", `"thinking":{"type":"enabled","budget_tokens":24576}`, "high"},
+		{"xhigh", `"thinking":{"type":"enabled","budget_tokens":32768}`, "xhigh"},
+		{"low", `"thinking":{"type":"enabled","budget_tokens":1024}`, "low"},
+		{"native", `"thinking":{"type":"adaptive"},"output_config":{"effort":"max"}`, "max"},
+	} {
+		payload := []byte(`{"model":"GLM-5.4","max_tokens":8,"messages":[{"role":"user","content":"hi"}],` + tc.body + `}`)
+		req := pluginapi.ExecutorRequest{AuthID: "fixture", Model: "GLM-5.4", Payload: payload, StorageJSON: storage(c)}
+		plan, err := prepareRequest(req, sender)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var body map[string]any
+		if json.Unmarshal(plan.HTTP.Body, &body) != nil {
+			t.Fatal("invalid body")
+		}
+		thinking := asMap(body["thinking"])
+		if thinking["type"] != "adaptive" {
+			t.Fatalf("%s: thinking = %v, want adaptive", tc.name, thinking)
+		}
+		if _, ok := thinking["budget_tokens"]; ok {
+			t.Fatalf("%s: budget_tokens survived", tc.name)
+		}
+		if got := asMap(body["output_config"])["effort"]; got != tc.want {
+			t.Fatalf("%s: output_config.effort = %v, want %q", tc.name, got, tc.want)
+		}
+	}
+}
+
+func TestOpenAIToolsFlattenToAnthropic(t *testing.T) {
+	setAuthDir(t.TempDir())
+	sender := &fakeSender{reply: func(r pluginapi.HTTPRequest) (pluginapi.HTTPResponse, error) {
+		t := &testing.T{}
+		t.Fatalf("unexpected upstream call")
+		return pluginapi.HTTPResponse{}, nil
+	}}
+	c := credential{Site: "zai", Key: "key.fake", Device: "00000000-0000-4000-8000-000000000003", UID: "uid"}
+	payload := []byte(`{"model":"GLM-5.4","max_tokens":8,"messages":[{"role":"user","content":"hi"}],"tools":[{"type":"function","function":{"name":"read","description":"d","parameters":{"type":"object","properties":{"path":{"type":"string"}}}}},{"name":"Bash","description":"b","input_schema":{"type":"object"}}]}`)
+	req := pluginapi.ExecutorRequest{AuthID: "fixture", Model: "GLM-5.4", Payload: payload, StorageJSON: storage(c)}
+	plan, err := prepareRequest(req, sender)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var body map[string]any
+	if json.Unmarshal(plan.HTTP.Body, &body) != nil {
+		t.Fatal("invalid body")
+	}
+	tools := body["tools"].([]any)
+	if len(tools) != 2 {
+		t.Fatalf("tools = %d, want 2", len(tools))
+	}
+	for i, want := range []string{"read", "Bash"} {
+		tool := asMap(tools[i])
+		if _, nested := tool["function"]; nested {
+			t.Fatalf("tool %d still nested: %v", i, tool)
+		}
+		if tool["name"] != want {
+			t.Fatalf("tool %d name = %v, want %q", i, tool["name"], want)
+		}
+	}
+	if schema := asMap(asMap(tools[0])["input_schema"]); asMap(schema)["type"] != "object" {
+		t.Fatalf("read input_schema = %v", tools[0])
+	}
+}
+
+func TestDumpRequestWritesOnlyWhenConfigured(t *testing.T) {
+	dir := t.TempDir()
+	dumpState.dir = dir
+	t.Cleanup(func() { dumpState.dir = "" })
+	dumpRequest("GLM-5.4", "-out", []byte(`{"model":"GLM-5.4"}`))
+	name := filepath.Join(dir, "req-GLM-5.4-out.json")
+	info, err := os.Stat(name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode().Perm() != 0o600 {
+		t.Fatalf("mode = %o, want 600", info.Mode().Perm())
+	}
+	dumpState.dir = ""
+	dumpRequest("GLM-5.4", "-in", []byte(`{}`))
+	if _, err := os.Stat(filepath.Join(dir, "req-GLM-5.4-in.json")); !os.IsNotExist(err) {
+		t.Fatalf("wrote without a dump directory: %v", err)
+	}
+}
+
+// A Start Plan credential also carries the coding key, but that key has no
+// Coding Plan subscription: api.z.ai answers 1113 for every model while the
+// Start Plan balance shows the model's daily bucket unused. The plan name, not
+// the presence of a key, must decide which upstream and which auth is used.
+func TestStartPlanCredentialWithKeyUsesStartPlanPath(t *testing.T) {
+	setAuthDir(t.TempDir())
+	now := time.Now().Unix()
+	sender := &fakeSender{reply: func(r pluginapi.HTTPRequest) (pluginapi.HTTPResponse, error) {
+		if strings.Contains(r.URL, "billing/balance") {
+			return jsonReply(fixtureBalance(now)), nil
+		}
+		t.Fatalf("unexpected upstream call: %s", r.URL)
+		return pluginapi.HTTPResponse{}, nil
+	}}
+	c := credential{Site: "zai", Key: "coding.fake", JWT: "jwt.fake", Device: "00000000-0000-4000-8000-000000000007", UID: "uid", Plan: "ZCode Start Plan"}
+	payload := []byte(`{"model":"GLM-5.3-Flash","messages":[{"role":"user","content":"hi"}],"max_tokens":16}`)
+	req := pluginapi.ExecutorRequest{AuthID: "fixture", Model: "GLM-5.3-Flash", Payload: payload, StorageJSON: storage(c)}
+	plan, err := prepareRequest(req, sender)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !plan.Gift || plan.HTTP.URL != zcodeRoot+"/api/v1/zcode-plan/anthropic/v1/messages" {
+		t.Fatalf("Start Plan credential with a coding key did not use the Start Plan path: gift=%v url=%s", plan.Gift, plan.HTTP.URL)
+	}
+	if got := plan.HTTP.Headers.Get("Authorization"); got != "Bearer "+c.JWT {
+		t.Fatalf("authorization = %q, want the session token", got)
+	}
+	if plan.HTTP.Headers.Get("x-api-key") != "" {
+		t.Fatal("coding key leaked onto the Start Plan request")
+	}
+}
+
+func TestFrameAnthropicMessage(t *testing.T) {
+	body := []byte(`{"type":"error","error":{"message":"nope"}}`)
+	if got := frameAnthropicMessage(body, false); string(got) != string(body) {
+		t.Fatalf("claude client: %q", got)
+	}
+	got := frameAnthropicMessage(body, true)
+	if string(got) != "data: "+string(body)+"\n\n" {
+		t.Fatalf("openai client: %q", got)
+	}
+	framed := []byte("data: {\"type\":\"ping\"}\n\n")
+	if got := frameAnthropicMessage(framed, true); string(got) != string(framed) {
+		t.Fatalf("already framed: %q", got)
 	}
 }
